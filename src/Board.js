@@ -132,12 +132,25 @@
     //
     // test if a specific major diagonal on this board contains a conflict
     hasMajorDiagonalConflictAt: function(majorDiagonalColumnIndexAtFirstRow) {
+      var n = this.get('n');
+      var count = 0;
+      var loopEnd = majorDiagonalColumnIndexAtFirstRow > 0 ? n - majorDiagonalColumnIndexAtFirstRow : n;
+      var loopStart = majorDiagonalColumnIndexAtFirstRow < 0 ? Math.abs(majorDiagonalColumnIndexAtFirstRow) : 0;
+      for (var rowIndex = loopStart; rowIndex < loopEnd; rowIndex ++) {
+        count += this.get(rowIndex)[majorDiagonalColumnIndexAtFirstRow + rowIndex] || 0 ;
+      }
+      if (count >1) return true;
       return false; // fixme
     },
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
-      return false; // fixme
+      var n = this.get('n');
+      var result = false;
+      for ( var colIndex = (-n) + 1; colIndex < n; colIndex++ ) {
+        result = result || this.hasMajorDiagonalConflictAt(colIndex);
+      }
+      return result; // fixme
     },
 
 
@@ -147,12 +160,25 @@
     //
     // test if a specific minor diagonal on this board contains a conflict
     hasMinorDiagonalConflictAt: function(minorDiagonalColumnIndexAtFirstRow) {
+      var n = this.get('n');
+      var count = 0;
+      var loopEnd = minorDiagonalColumnIndexAtFirstRow < n ? minorDiagonalColumnIndexAtFirstRow + 1 : n;
+      var loopStart = minorDiagonalColumnIndexAtFirstRow >= n ? minorDiagonalColumnIndexAtFirstRow - n : 0;
+      for ( var rowIndex = loopStart; rowIndex < loopEnd; rowIndex++ ) {
+        count += this.get(rowIndex)[minorDiagonalColumnIndexAtFirstRow - rowIndex] || 0;
+      }
+      if ( count > 1 ) return true;
       return false; // fixme
     },
 
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
-      return false; // fixme
+      var n = this.get('n');
+      var result = false;
+      for (var colIndex = 0; colIndex < 2*n -1; colIndex ++) {
+        result = result || this.hasMinorDiagonalConflictAt(colIndex);
+      }
+      return result; // fixme
     }
 
     /*--------------------  End of Helper Functions  ---------------------*/
