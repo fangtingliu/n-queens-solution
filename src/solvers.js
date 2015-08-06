@@ -39,34 +39,29 @@ window.buildNextSolution = function(solution) {
 };
 
 window.solutionToBoard = function (solution) {
-
+  var n = solution.length;
+  var board = new Board({'n' : n});
+  for ( var rowIndex = 0; rowIndex < n; rowIndex++ ) {
+    board.togglePiece(rowIndex, solution[rowIndex].indexOf(1));
+  }
+  return board;
 }
 
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
 window.findNRooksSolution = function(n, solution) {
-  // check if solution is provided
   if (solution === undefined) {
-    // if not, build a first column queens solution
     solution = this.buildNaiveSolution(n);
   }
-  solution = this.buildNextSolution(solution);  // if yes, build the next solution
-
-
-
-  // convert solution to a board
-
-  // check board for conflicts
-
-    // if passes, return solution
-
-    // if failed, call findNRookSolution on newly built solution
-
-  var solution = undefined; //fixme
-
-  console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
-  return solution;
+  var board = new Board(solution);
+  if ( board.hasAnyRooksConflicts() ) {
+    solution = this.buildNextSolution(solution);
+    this.findNRooksSolution(n, solution);
+  } else {
+    console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
+    return solution;
+  }
 };
 
 
