@@ -14,8 +14,12 @@
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
 window.findNRooksSolution = function(n) {
-  var solution = undefined; //fixme
-
+  var solution = []; //fixme
+  var board = new Board({'n' : n});
+  for ( var rowIndex = 0; rowIndex < n; rowIndex++ ) {
+    board.get(rowIndex)[rowIndex] = 1;
+    solution.push(board.get(rowIndex));
+  }
   console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
   return solution;
 };
@@ -24,7 +28,38 @@ window.findNRooksSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
-  var solutionCount = undefined; //fixme
+  var solutionCount = 0;//fixme
+  var row = {};
+  var col = {};
+  var searchNextRow = function(row, col){
+    if (row.hasOwnProperty(n-1)) {
+      solutionCount ++;
+    } else if (!row.hasOwnProperty(0)) {
+      for (var colIndex = 0; colIndex < n; colIndex ++) {
+        var newRow = JSON.parse(JSON.stringify(row));
+        var newCol = JSON.parse(JSON.stringify(col));
+        newRow[0] = colIndex;
+        newCol[colIndex] = 0;
+
+        searchNextRow(newRow, newCol);
+      }
+    } else {
+      var newRow = JSON.parse(JSON.stringify(row));
+      var newCol = JSON.parse(JSON.stringify(col));
+      for (var rowIndex = n - 1; rowIndex >= 0; rowIndex --) {
+        if (newRow.hasOwnProperty(rowIndex)) {
+          for (var colIndex = 0; colIndex < n; colIndex ++) {
+            if (!newCol.hasOwnProperty(colIndex)) {
+              newRow[rowIndex + 1] = colIndex;
+              newCol[colIndex] = rowIndex + 1;
+              searchNextRow(newRow, newCol);
+            }
+          }
+        }
+      }
+    }
+  }
+  searchNextRow(row, col);
 
   console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
   return solutionCount;
