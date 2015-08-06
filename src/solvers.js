@@ -9,25 +9,50 @@
 // (There are also optimizations that will allow you to skip a lot of the dead search space)
 // take a look at solversSpec.js to see what the tests are expecting
 
+// return a first column pieces solution
+
+window.buildNaiveSolution = function(n) {
+  var solution = [];
+
+  for (var i = 0; i < n; i ++) {
+    var row = Array(n);
+    row[0] = 1;
+    solution.push(row);
+  }
+  return solution;
+}
+
+window.buildNextSolution = function(solution) {
+  var n = solution.length;
+
+  for ( var rowIndex = n-1; rowIndex >= 0; rowIndex-- ) {
+    var colIndex = solution[rowIndex].indexOf(1);
+    if ( colIndex === n-1 ) {
+      solution[rowIndex][0] = 1;
+      solution[rowIndex][colIndex] = 0;
+    } else {
+      solution[rowIndex][colIndex+1] = 1;
+      solution[rowIndex][colIndex] = 0;
+      return solution;
+    }
+  }
+};
+
+window.solutionToBoard = function (solution) {
+
+}
+
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
 window.findNRooksSolution = function(n, solution) {
   // check if solution is provided
-
+  if (solution === undefined) {
     // if not, build a first column queens solution
+    solution = this.buildNaiveSolution(n);
+  }
+  solution = this.buildNextSolution(solution);  // if yes, build the next solution
 
-    // if yes, build the next solution
-
-        // check rows from the bottom for the provided solution
-
-          // if the piece is not in the rightmost column
-
-             // move the piece to the next right position, break
-
-          // if the piece is in the rightmost column
-
-            // move it to the left most column
 
 
   // convert solution to a board
