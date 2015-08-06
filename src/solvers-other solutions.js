@@ -107,3 +107,6 @@ window.countNRooksSolutions = function(n) {
   return count;
 };
 
+
+
+
