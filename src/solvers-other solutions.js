@@ -58,7 +58,7 @@ window.countNRooksSolutions = function(n) {
     }
   }
 
-  var search = function(board) {
+  var next = function(board) {
     for ( var row = n-1; row >= 0; row-- ) {
       var pieceIndex = board[row].indexOf(1);
       if ( pieceIndex < n-1 && pieceIndex > -1 ) {
@@ -71,7 +71,7 @@ window.countNRooksSolutions = function(n) {
             break;
           }
         }
-        return board;
+        if ( nextIndex !== n ) return board;
       } else if ( pieceIndex === n - 1 ) {
         board[row][pieceIndex] = 0;
         delete colObj[pieceIndex];
@@ -100,9 +100,10 @@ window.countNRooksSolutions = function(n) {
   };
 
   while ( true ) {
-    var result = build(search(board));
+    var result = build(next(board));
     if ( result === null ) break;
   }
 
   return count;
 };
+
