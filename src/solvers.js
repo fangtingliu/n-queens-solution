@@ -31,54 +31,28 @@ window.findNRooksSolution = function(n) {
 
 window.countNRooksSolutions = function(n) {
   var solutionCount = 0;
-  var solution = [];
-  var lastHead = false;
+  var board = new Board({'n': n});
 
-  var searchNextRow = function(temp){
-    var solution = temp.slice();
+  // create a recursive function to place a piece to the first valid col in the next row
+  var searchNextRow = function(rowIndex){
 
-    if (solution.length === n) {
-      solutionCount ++;
-      // the following 2 lines of code are used for efficiency only; decrease running time about 50%
-      if ((n > 1) && (!lastHead)) {
-        solutionCount ++;
-      }
-    } else if (solution.length === 0) {
+    // break the recursion when a valid board is found
+    if (rowIndex === n) return solutionCount ++;
 
-      for (var colIndexFirstRow = 0; colIndexFirstRow < Math.ceil(n/2); colIndexFirstRow ++) {
-        solution[0] = [];
-        solution[0][colIndexFirstRow] = 1;
+    // check validity of the column starting from left
+    for (var colIndex = 0; colIndex < n; colIndex ++) {
 
-        // the following 1 lines of code are used for efficiency only; decrease running time about 50%
-        if (!(n % 2 === 0) && (colIndexFirstRow === Math.ceil(n/2) -1)) lastHead = true;
-        searchNextRow(solution);
-        solution.pop();
-      }
-
-    } else {
-
-      for (var rowIndex = n - 1; rowIndex >= 0; rowIndex --) {
-
-        if (Array.isArray(solution[rowIndex])) {
-
-          for (var colIndex = 0; colIndex < n; colIndex ++) {
-
-            var valid = this.checkValidity(solution, rowIndex, colIndex);
-
-            if (valid) {
-              solution[rowIndex + 1] = [];
-              solution[rowIndex + 1][colIndex] = 1;
-              searchNextRow(solution);
-              solution.pop();
-            }
-          }
-          break;
-        }
+      if (this.checkValidity(board.rows(), rowIndex - 1, colIndex)) {
+        board.togglePiece(rowIndex, colIndex);
+        searchNextRow(rowIndex + 1);
+        
+        // if the above branch is a dead end now; reset the board and storage object;
+        board.togglePiece(rowIndex, colIndex);
       }
     }
   }
 
-  searchNextRow(solution);
+  searchNextRow(0);
 
   console.log('Number of solutions for ' + n + ' rooks:', solutionCount);
   return solutionCount;
@@ -89,133 +63,74 @@ window.countNRooksSolutions = function(n) {
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  var solution = [];
-  var complete = false;
-  var rowObj;
+  var solutionCount = 0;
+  var rowObj = {};  // stores all the piece position as row:column
+  var board = new Board({'n': n});
 
-  var searchNextRow = function(temp){
-    if (complete) return;
-    //create a copy of the current solution-in-process.
-    solution = temp.slice();
-    if (solution.length === n) {
-      //sets a flag to true if we have constructed a complete board
-      complete = true;
+  // create a recursive function to place a piece to the first valid col in the next row
+  var searchNextRow = function(rowIndex){
+    // break the recursion and all loops when a valid board is found
+    if (rowIndex === n) return solutionCount ++;
+    if (solutionCount === 1) return;
+    // check validity of the column starting from left
+    for (var colIndex = 0; colIndex < n; colIndex ++) {
 
-      return;
-    } else if (solution.length === 0) {
-      //sets up each possibility for first row and calls searchNextRow recursively on each possibility
-      for (var colIndexFirstRow = 0; colIndexFirstRow < n; colIndexFirstRow ++) {
-        solution[0] = [];
-        solution[0][colIndexFirstRow] = 1;
-        rowObj = {0: colIndexFirstRow};
-        searchNextRow(solution);
-
-        if (complete) return;
-        solution.pop();
-      }
-    } else {
-      //finds the last inserted row of the board
-      for (var rowIndex = n - 1; rowIndex >= 0; rowIndex --) {
-
-        if (Array.isArray(solution[rowIndex])) {
-
-          for (var colIndex = 0; colIndex < n; colIndex ++) {
-            //check next row for a valid column for the next piece to add
-            var valid = this.checkValidity(solution, rowIndex, colIndex, rowObj);
-            //adds the next piece in a valid column. If not valid, go back to colIndex for-loop.
-            if (valid) {
-              solution[rowIndex + 1] = [];
-              solution[rowIndex + 1][colIndex] = 1;
-              rowObj[rowIndex+1] = colIndex;
-              //calls searchNextRow recursively on solution-in-process after the next row was inserted.
-              searchNextRow(solution);
-
-              if (complete) return;
-              //if no solution could be found from the solution-in-process, delete the last row and
-              //try the next position.
-              solution.pop();
-              delete rowObj[rowIndex+1];
-            }
-          }
-          break;
-        }
+      if (this.checkValidity(board.rows(), rowIndex - 1, colIndex, rowObj)) {
+        board.togglePiece(rowIndex, colIndex);
+        rowObj[rowIndex] = colIndex;
+        searchNextRow(rowIndex + 1);
+        if (solutionCount === 1) return;
+        // if the above branch is a dead end now; reset the board and storage object;
+        board.togglePiece(rowIndex, colIndex);
+        delete rowObj[rowIndex];
       }
     }
   }
 
-  searchNextRow(solution);
+  searchNextRow(0);
 
-  //if no solution could be found, return an nxn empty array of arrays.
-  !complete && (solution = new Array(n));
-
-  console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
-  return solution;
+  console.log('Number of solutions for ' + n + ' queens:', solutionCount);
+  return board.rows();
 };
 
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
   var solutionCount = 0;
-  var rowObj = {0:0};
+  var rowObj = {};  // stores all the piece position as row:column
+  var board = new Board({'n': n});
 
-  var searchNextRow = function(temp){
-    //create a copy of the solution-in-progress
-    var solution = temp ? temp.slice() : [];
-    if (solution.length === n) {
-      solutionCount ++;
-      // the following few lines of code are used for efficiency only; decrease running time about 50%
-      var lastHead = n % 2 === 0 ? n/2 : (Math.ceil(n/2) - 1);
+  // create a recursive function to place a piece to the first valid col in the next row
+  var searchNextRow = function(rowIndex){
 
-      if ((n > 1) && (rowObj[0] !== lastHead)) {
-        solutionCount ++;
-      }
-    } else if (solution.length === 0) {
-      //sets up each possibility for the first row and calls searchNextRow recursively on each option
-      for (var colIndexFirstRow = 0; colIndexFirstRow < Math.ceil(n/2); colIndexFirstRow ++) {
-        //loop through half of the columns (rounding up). Only half due to accounting for symmetric solutions.
-        solution[0] = [];
-        solution[0][colIndexFirstRow] = 1;
-        rowObj = {0: colIndexFirstRow};
-        searchNextRow(solution);
-        solution.pop();
-      }
-    } else {
-      //finds the last row that was added
-      for (var rowIndex = n - 1; rowIndex >= 0; rowIndex --) {
+    // break the recursion when a valid board is found
+    if (rowIndex === n) return solutionCount ++;
 
-        if (Array.isArray(solution[rowIndex])) {
-          //search for the next valid column for a piece
-          for (var colIndex = 0; colIndex < n; colIndex ++) {
+    // check validity of the column starting from left
+    for (var colIndex = 0; colIndex < n; colIndex ++) {
 
-            var valid = this.checkValidity(solution, rowIndex, colIndex, rowObj);
-
-            if (valid) {
-              //adds a piece to the next valid spot and calls searchNextRow recursively on the new solution-in-progress
-              solution[rowIndex + 1] = [];
-              solution[rowIndex + 1][colIndex] = 1;
-              rowObj[rowIndex+1] = colIndex;
-              searchNextRow(solution);
-              //if no valid solution could be found from the last board state, delete the last added row and go back to
-              //the colIndex for-loop.
-              solution.pop();
-              delete rowObj[rowIndex+1];
-            }
-          }
-          break;
-        }
+      if (this.checkValidity(board.rows(), rowIndex - 1, colIndex, rowObj)) {
+        board.togglePiece(rowIndex, colIndex);
+        rowObj[rowIndex] = colIndex;
+        searchNextRow(rowIndex + 1);
+        
+        // if the above branch is a dead end now; reset the board and storage object;
+        board.togglePiece(rowIndex, colIndex);
+        delete rowObj[rowIndex];
       }
     }
   }
 
-  searchNextRow();
+  searchNextRow(0);
 
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
 };
 
+
 window.checkValidity = function(solution, rowIndex, colIndex, rowObj) {
   var valid = true;
-
+  if (rowIndex < 0) return true;
   for (var currRow = 0; currRow <= rowIndex ; currRow ++) {
     //check for column conflicts
     if (solution[currRow][colIndex] === 1) {
@@ -226,7 +141,7 @@ window.checkValidity = function(solution, rowIndex, colIndex, rowObj) {
       if ( rowObj !== undefined ) {
 
         for (var key in rowObj) {
-          
+
           if (Math.abs((rowIndex + 1 - Number(key))/(colIndex - rowObj[key])) === 1){
             var valid = false;
             break;
